@@ -42,6 +42,8 @@ import java.util.concurrent.Executors;
  */
 public class LuceneStreamingService<T> implements Iterator<T> {
 
+    public static final String FIELD_SEP = ":";
+
     /**
      * The class logger
      */
@@ -98,8 +100,11 @@ public class LuceneStreamingService<T> implements Iterator<T> {
     }
 
     private void parseDates(Query query) {
-        DateQueryParser dateRangeParser = new DateQueryParser(new String[]{Schema.START, Schema.END});
-        long[] startAndEnd = new long[0];
+        DateQueryParser dateRangeParser = new DateQueryParser(new String[]{
+                withSeparator(Schema.START),
+                withSeparator(Schema.END)
+        });
+        long[] startAndEnd = new long[] {-1, -1};
         try {
             startAndEnd = dateRangeParser.getNumericQueryTerms(query.toString());
 
@@ -154,4 +159,7 @@ public class LuceneStreamingService<T> implements Iterator<T> {
         }
     }
 
+    private static String withSeparator(String field) {
+        return field + FIELD_SEP;
+    }
 }
