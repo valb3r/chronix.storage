@@ -66,6 +66,7 @@ public class LuceneStreamingService<T> implements Iterator<T> {
     private int nrOfTimeSeriesPerBatch;
     private long nrOfAvailableTimeSeries = -1;
     private int currentDocumentCount = 0;
+    private ScoreDoc lastSeenDoc;
 
 
     /**
@@ -140,7 +141,8 @@ public class LuceneStreamingService<T> implements Iterator<T> {
     public T next() {
         if (currentDocumentCount % nrOfTimeSeriesPerBatch == 0) {
             try {
-                ScoreDoc[] hits = searcher.search(query, nrOfTimeSeriesPerBatch).scoreDocs;
+                ScoreDoc[] hits = searcher.searchAfter(lastSeenDoc, query, nrOfTimeSeriesPerBatch).scoreDocs;
+                lastSeenDoc = hits[hits.length - 1];
                 convertHits(hits);
             } catch (IOException e) {
                 LOGGER.info("Could not search documents");
